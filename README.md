@@ -142,6 +142,8 @@ Install all the the dependencies before moving on the next step (preferably in t
 - [libhmap](https://github.com/resyfer/libhmap.git)
 - [libcol](https://github.com/resyfer/libcol.git)
 
+**NOTE**: Their installation instructions will be provided in their documentation as well.
+
 After installing dependencies, installation of library:
 
 ```bash
