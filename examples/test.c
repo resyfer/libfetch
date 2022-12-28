@@ -1,4 +1,4 @@
-#include <libfetch.h>
+#include <libfetch/libfetch.h>
 #include <stdio.h>
 
 int main() {

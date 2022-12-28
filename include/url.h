@@ -1,6 +1,5 @@
 #include <arpa/inet.h>
-
-#include <libhmap.h>
+#include <libhmap/libhmap.h>
 
 #ifndef __LIBFETCH_URL_H
 #define __LIBFETCH_URL_H

@@ -1,14 +1,4 @@
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdio.h>
-
-#include <libcol.h>
-
-#include <include/url.h>
 #include <include/libfetch.h>
-#include <include/global.h>
-#include <include/res.h>
 
 // Ref: https://www.rfc-editor.org/rfc/rfc9110.html#section-9.1-7
 const char *allowed_methods[] = {

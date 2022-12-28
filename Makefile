@@ -1,5 +1,4 @@
 NAME:=libfetch
-S_NAME:=lfetch
 
 LD_LIBRARY_PATH:=/usr/local/lib
 INCLUDE:=/usr/local/include
@@ -38,14 +37,14 @@ $(OBJ_DIR):
 	@mkdir $(OBJ_DIR) 2> /dev/null
 
 run: install
-	@$(CC) $(CFLAGS) -o ./examples/$(TEST).o ./examples/$(TEST).c -lfetch -lcol -lhmap
+	@$(CC) $(CFLAGS) -o ./examples/$(TEST).o ./examples/$(TEST).c -lfetch -lhmap -lcol
 	@echo "------------"
 	@./examples/$(TEST).o
 
 install: $(NAME).so $(HEAD_DIR)/$(NAME).h
 	@echo "Installing..."
-	@sudo ldconfig $(LD_LIBRARY_PATH)
-	@sudo cp $(HEAD_DIR)/$(NAME).h $(INCLUDE)
+	@sudo mkdir -p $(INCLUDE)/$(NAME)
+	@sudo cp -a $(HEAD_DIR)/. $(INCLUDE)/$(NAME)/
 	@sudo cp $(NAME).so $(LD_LIBRARY_PATH)
 	@echo "Done!"
 

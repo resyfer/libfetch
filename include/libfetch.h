@@ -1,6 +1,14 @@
-#include <libhmap.h>
-#include <include/url.h>
-#include <include/res.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+
+#include <libhmap/libhmap.h>
+#include <libcol/libcol.h>
+
+#include "url.h"
+#include "global.h"
+#include "res.h"
 
 #ifndef __LIBFETCH_H
 #define __LIBFETCH_H

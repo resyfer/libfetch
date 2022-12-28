@@ -6,9 +6,6 @@
 #ifndef __LIBFETCH_GLOBAL_H
 #define __LIBFETCH_GLOBAL_H
 
-#define NAME "libfetch"
-#define VERSION "v1.0.0"
-
 #ifdef __unix__
 	#ifdef __linux__
 		#define OS "Linux"
