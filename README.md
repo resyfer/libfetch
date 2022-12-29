@@ -54,6 +54,10 @@ $ gcc test.c -o test.o -lfetch -lcol -lhmap
 $ ./test.o
 ```
 
+Output:
+
+![image](https://user-images.githubusercontent.com/74897008/210010102-0802c7a0-e322-4679-8f11-2435d4e8f93d.png)
+
 ### Step 1
 
 Import the library:
