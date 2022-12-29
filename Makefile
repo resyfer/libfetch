@@ -1,4 +1,5 @@
 NAME:=libfetch
+ENTRY:=fetch
 
 LD_LIBRARY_PATH:=/usr/local/lib
 INCLUDE:=/usr/local/include
@@ -41,7 +42,7 @@ run: install
 	@echo "------------"
 	@./examples/$(TEST).o
 
-install: $(NAME).so $(HEAD_DIR)/$(NAME).h
+install: $(NAME).so $(HEAD_DIR)/$(ENTRY).h
 	@echo "Installing..."
 	@sudo mkdir -p $(INCLUDE)/$(NAME)
 	@sudo ldconfig $(LD_LIBRARY_PATH)

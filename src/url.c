@@ -5,12 +5,11 @@
 
 #include <include/url.h>
 
-// TODO: Better URL parser
-struct url*
+url_t*
 parse_url(const char *url)
 {
 	int n = strlen(url);
-	struct url *parsed_url = malloc(sizeof(struct url));
+	url_t *parsed_url = malloc(sizeof(url_t));
 
 	char proto[] = "https";
 	int m = strlen(proto);
@@ -85,7 +84,7 @@ parse_url(const char *url)
 
 	// Get Queries
 	index++;
-	struct map *queries = new_map();
+	hmap_t *queries = hmap_new();
 	char *key = calloc(n+1, sizeof(char)), *value = calloc(n+1, sizeof(char));
 	for(; index < n; index++) {
 		// Key
@@ -101,7 +100,7 @@ parse_url(const char *url)
 			value[index-start] = url[index];
 		}
 
-		map_push(queries, key, value);
+		hmap_push(queries, key, (void*) value);
 
 		memset(key, 0, (n+1) * sizeof(char));
 		memset(value, 0, (n+1) * sizeof(char));
@@ -115,11 +114,11 @@ parse_url(const char *url)
 }
 
 void
-free_url(struct url *url)
+free_url(url_t *url)
 {
 	free(url->host_name);
 	free(url->path);
-	free_map(url->queries);
+	hmap_free(url->queries);
 
 	free(url);
 }

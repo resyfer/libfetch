@@ -1,70 +1,69 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <libhmap/libhmap.h>
 
 #include <include/res.h>
 
-struct map *status_codes;
+hmap_t *status_codes;
 
 void
 status_codes_init()
 {
-	status_codes = new_map_cap(15);
+	status_codes = hmap_new_cap(15);
 
 	// 1xx - Informational
-	map_push(status_codes, "100", "Continue");
-	map_push(status_codes, "101", "Switching Protocols");
+	hmap_push(status_codes, "100", (void*) "Continue");
+	hmap_push(status_codes, "101", (void*) "Switching Protocols");
 
 	// 2xx - Success
-	map_push(status_codes, "200", "OK");
-	map_push(status_codes, "201", "Created");
-	map_push(status_codes, "202", "Accepted");
-	map_push(status_codes, "203", "Non-Authoritative Information");
-	map_push(status_codes, "204", "No Content");
-	map_push(status_codes, "205", "Reset Content");
-	map_push(status_codes, "206", "Partial Content");
+	hmap_push(status_codes, "200", (void*) "OK");
+	hmap_push(status_codes, "201", (void*) "Created");
+	hmap_push(status_codes, "202", (void*) "Accepted");
+	hmap_push(status_codes, "203", (void*) "Non-Authoritative Information");
+	hmap_push(status_codes, "204", (void*) "No Content");
+	hmap_push(status_codes, "205", (void*) "Reset Content");
+	hmap_push(status_codes, "206", (void*) "Partial Content");
 
 	// 3xx - Redirection
-	map_push(status_codes, "300", "Multiple Choices");
-	map_push(status_codes, "301", "Moved Permanently");
-	map_push(status_codes, "302", "Found");
-	map_push(status_codes, "303", "See Other");
-	map_push(status_codes, "304", "Not Modified");
-	map_push(status_codes, "305", "Use Proxy");
-	map_push(status_codes, "307", "Temporary Redirect");
+	hmap_push(status_codes, "300", (void*) "Multiple Choices");
+	hmap_push(status_codes, "301", (void*) "Moved Permanently");
+	hmap_push(status_codes, "302", (void*) "Found");
+	hmap_push(status_codes, "303", (void*) "See Other");
+	hmap_push(status_codes, "304", (void*) "Not Modified");
+	hmap_push(status_codes, "305", (void*) "Use Proxy");
+	hmap_push(status_codes, "307", (void*) "Temporary Redirect");
 
 	// 4xx - Client Error
-	map_push(status_codes, "400", "Bad Request");
-	map_push(status_codes, "401", "Unauthorized");
-	map_push(status_codes, "402", "Payment Required");
-	map_push(status_codes, "403", "Forbidden");
-	map_push(status_codes, "404", "Not Found");
-	map_push(status_codes, "405", "Method Not Allowed");
-	map_push(status_codes, "406", "Not Acceptable");
-	map_push(status_codes, "407", "Proxy Authentication Required");
-	map_push(status_codes, "408", "Request Time-out");
-	map_push(status_codes, "409", "Conflict");
-	map_push(status_codes, "410", "Gone");
-	map_push(status_codes, "411", "Length Required");
-	map_push(status_codes, "412", "Precondition Failed");
-	map_push(status_codes, "413", "Request Entity Too Large");
-	map_push(status_codes, "414", "Request-URI Too Large");
-	map_push(status_codes, "415", "Unsupported Media Type");
-	map_push(status_codes, "416", "Requested range not satisfiable");
-	map_push(status_codes, "417", "Expectation Failed");
+	hmap_push(status_codes, "400", (void*) "Bad Request");
+	hmap_push(status_codes, "401", (void*) "Unauthorized");
+	hmap_push(status_codes, "402", (void*) "Payment Required");
+	hmap_push(status_codes, "403", (void*) "Forbidden");
+	hmap_push(status_codes, "404", (void*) "Not Found");
+	hmap_push(status_codes, "405", (void*) "Method Not Allowed");
+	hmap_push(status_codes, "406", (void*) "Not Acceptable");
+	hmap_push(status_codes, "407", (void*) "Proxy Authentication Required");
+	hmap_push(status_codes, "408", (void*) "Request Time-out");
+	hmap_push(status_codes, "409", (void*) "Conflict");
+	hmap_push(status_codes, "410", (void*) "Gone");
+	hmap_push(status_codes, "411", (void*) "Length Required");
+	hmap_push(status_codes, "412", (void*) "Precondition Failed");
+	hmap_push(status_codes, "413", (void*) "Request Entity Too Large");
+	hmap_push(status_codes, "414", (void*) "Request-URI Too Large");
+	hmap_push(status_codes, "415", (void*) "Unsupported Media Type");
+	hmap_push(status_codes, "416", (void*) "Requested range not satisfiable");
+	hmap_push(status_codes, "417", (void*) "Expectation Failed");
 
 	// 5xx - Server Error
-	map_push(status_codes, "500", "Internal Server Error");
-	map_push(status_codes, "501", "Not Implemented");
-	map_push(status_codes, "502", "Bad Gateway");
-	map_push(status_codes, "503", "Service Unavailable");
-	map_push(status_codes, "504", "Gateway Time-out");
-	map_push(status_codes, "505", "HTTP Version not supported");
+	hmap_push(status_codes, "500", (void*) "Internal Server Error");
+	hmap_push(status_codes, "501", (void*) "Not Implemented");
+	hmap_push(status_codes, "502", (void*) "Bad Gateway");
+	hmap_push(status_codes, "503", (void*) "Service Unavailable");
+	hmap_push(status_codes, "504", (void*) "Gateway Time-out");
+	hmap_push(status_codes, "505", (void*) "HTTP Version not supported");
 }
 
 void
-parse_res(char *buf, struct fetch_res *res)
+parse_res(char *buf, res_t *res)
 {
 
 	if(!buf || !res) {
@@ -80,12 +79,12 @@ parse_res(char *buf, struct fetch_res *res)
 	index++;
 
 	start = index;
-	char *code = malloc(3 * sizeof(char));
+	char *code = calloc(3, sizeof(char));
 	for(; index < n && buf[index] != ' '; index++) {
 		code[index - start] = buf[index];
 	}
 
-	char *status = map_get(status_codes, code);
+	char *status = hmap_get(status_codes, code);
 
 	if(code[0] != '2') {
 		res->ok = false;
@@ -103,10 +102,13 @@ parse_res(char *buf, struct fetch_res *res)
 	for(;index < n && buf[index] != '\n'; index++); // Escaping Status line
 	index++;
 
-	res->data->headers = new_map_cap(5);
-	char *key = calloc(100,  sizeof(char)), *value = calloc(100, sizeof(char));
+	res->data->headers = hmap_new_cap(5);
 
+	char *key, *value;
 	for(;index<n; index++) {
+		key = calloc(150, sizeof(char));
+		value = calloc(150, sizeof(char));
+
 		if((buf[index] == '\r' && buf[index+1] == '\n') || (buf[index] == '\n')) {
 			break;
 		}
@@ -131,14 +133,12 @@ parse_res(char *buf, struct fetch_res *res)
 		if(buf[index] == '\r') {
 			index++;
 		}
-		map_push(res->data->headers, key, value);
 
-		memset(key, 0, 100 * sizeof(char));
-		memset(value, 0, 100 * sizeof(char));
+		key = realloc(key, sizeof(char) * (strlen(key) + 1));
+		value = realloc(value, sizeof(char) * (strlen(value) + 1));
 
+		hmap_push(res->data->headers, key, (void *) value);
 	}
-	free(key);
-	free(value);
 
 	// Escaping lone CRLF
 	if(buf[index] == '\r' && buf[index+1] == '\n') {
@@ -155,4 +155,14 @@ parse_res(char *buf, struct fetch_res *res)
 	}
 	body = realloc(body, sizeof(char) * (strlen(body) + 1));
 	res->data->body = body;
+}
+
+char*
+get_res_header(res_t *res, const char *header)
+{
+	if(!res->ok) {
+		return NULL;
+	}
+
+	return hmap_get(res->data->headers, header);
 }

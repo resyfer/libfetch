@@ -1,26 +1,29 @@
-#include <stdbool.h>
-
 #ifndef __LIBFETCH_RES_H
 #define __LIBFETCH_RES_H
 
-struct res_ok {
-	char *code;
-	struct map *headers;
-	char *body;
-};
+#include <stdbool.h>
+#include <libhmap/hmap.h>
 
-struct res_err {
+typedef struct {
+	char *code;
+	hmap_t *headers;
+	char *body;
+} res_ok_t;
+
+typedef struct {
 	char *code;
 	char *msg;
-};
+} res_err_t;
 
-struct fetch_res {
+typedef struct {
 	bool ok;
-	struct res_ok *data;
-	struct res_err *err;
-};
+	res_ok_t *data;
+	res_err_t *err;
+} res_t;
 
 void status_codes_init();
-void parse_res(char *buf, struct fetch_res *res);
+void parse_res(char *buf, res_t *res);
+
+char* get_res_header(res_t *res, const char *header);
 
 #endif

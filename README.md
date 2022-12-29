@@ -13,28 +13,29 @@ For installation, please go [here](#installation). For documentation, please go 
 The shown below is a tl;dr version. Proper instructions are [here](#step-1)
 
 ```c
-#include <libfetch/libfetch.h>
+#include <libfetch/fetch.h>
 #include <stdio.h>
 
 int main() {
 
-  struct url *url = parse_url("http://localhost:5000/path?hello=world");
+  url_t *url = parse_url("http://localhost:5000/path?hello=world");
 
-  struct fetch_req req = {
+  req_t req = {
     .url = url,
     .body = "Hello World",
     .method = "GET",
-    .headers = new_map()
+    .headers = hmap_new()
   };
   add_req_header(&req, "Content-Type", "text/plain");
 
-  struct fetch_res *res = fetch(&req);
+  res_t *res = fetch(&req);
 
   if(res->ok) {
     printf("Code -> %s\n", res->data->code);
     printf("Body -> %s\n", res->data->body);
 
-    print_map(res->data->headers); // Documentation can be found at `libhmap`
+    printf("Length: %s\n", get_res_header(res, "Content-Length"));
+
   } else {
     printf("Code -> %s\n", res->err->code);
     printf("Message -> %s\n", res->err->msg);
@@ -58,7 +59,7 @@ $ ./test.o
 Import the library:
 
 ```c
-#include <libfetch/libfetch.h>
+#include <libfetch/fetch.h>
 ```
 
 **NOTE**: Link the library and dependencies when compiling
@@ -72,7 +73,7 @@ $ gcc a.c -o a.o -lfetch -lcol -lhmap
 Provide the URL and parse it:
 
 ```c
-struct url *url = parse_url("http://localhost:5000/path?hello=world");
+url_t *url = parse_url("http://localhost:5000/path?hello=world");
 ```
 
 **NOTE**: If protocol is not mentioned in URL, then default is HTTP. Same goes for port, which defaults to HTTP's default port 80. It's fine if URL is an IP Address, does not need to be a DNS.
@@ -82,11 +83,11 @@ struct url *url = parse_url("http://localhost:5000/path?hello=world");
 Define a request structure and provide the various things you need:
 
 ```c
-struct fetch_req req;
+req_t req;
 req.url = url;
 req.body = "Hello World";
 req.method = "GET";
-req.headers = new_map();
+req.headers = hmap_new();
 ```
 
 **NOTE**: `req.headers` is a hash map, and it's usage can be found at the documentation of [libhmap](https://github.com/resyfer/libhmap.git) if needed.
@@ -116,7 +117,8 @@ if(res->ok) {
   printf("Code -> %s\n", res->data->code);
   printf("Body -> %s\n", res->data->body);
 
-  print_map(res->data->headers);
+  printf("Length: %s\n", get_res_header(res, "Content-Length"));
+
 } else {
   printf("Code -> %s\n", res->err->code);
   printf("Message -> %s\n", res->err->msg);
@@ -157,3 +159,24 @@ rm -rf libfetch
 Provide the password when prompted.
 
 ## Documentation
+
+### Parse URL
+```c
+url_t* parse_url(const char *url);
+```
+
+### Add or Get Request Headers
+```c
+void add_req_header(req_t *req, const char *header, const char* value);
+char* get_req_header(req_t *req, const char *header);
+```
+
+### Fetch Request
+```c
+res_t* fetch(req_t *req);
+```
+
+### Get Response Headers
+```c
+char* get_res_header(res_t *res, const char *header);
+```

@@ -1,4 +1,9 @@
-#include <include/libfetch.h>
+#include <include/fetch.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdio.h>
 
 // Ref: https://www.rfc-editor.org/rfc/rfc9110.html#section-9.1-7
 const char *allowed_methods[] = {
@@ -14,7 +19,7 @@ const char *allowed_methods[] = {
 };
 
 bool
-check_method(struct fetch_req *req)
+check_method(req_t *req)
 {
 	if(!req) {
 		return false;
@@ -29,11 +34,11 @@ check_method(struct fetch_req *req)
 	return false;
 }
 
-struct fetch_res*
-fetch(struct fetch_req *req)
+res_t*
+fetch(req_t *req)
 {
-	struct map_itr *itr;
-	struct node *entry;
+	hmap_itr_t *itr;
+	hmap_node_t *entry;
 
 	// Preparing Status Codes
 	status_codes_init(&status_codes);
@@ -46,13 +51,18 @@ fetch(struct fetch_req *req)
 	int j = 0;
 
 	//Request-Line
-	j += sprintf(http_req + j, "%s %s", req->method, (req->url->path) ? req->url->path : "/");
+	j += sprintf(http_req + j, "%s %s",
+				req->method,
+				(req->url->path) ? req->url->path : "/");
+
 	if(req->url->queries->size != 0) {
 		j += sprintf(http_req + j, "?");
 	}
-	itr = new_map_itr(req->url->queries);
-	while((entry = itr_adv(itr)) != NULL) {
-		j += sprintf(http_req + j, "%s=%s&", entry->key, entry->value);
+
+	itr = hmap_itr_new(req->url->queries);
+	while((entry = hmap_itr_adv(itr)) != NULL) {
+		j += sprintf(http_req + j, "%s=%s&",
+					entry->key, (char*) entry->value);
 	}
 	if(req->url->queries->size != 0) {
 		j--;
@@ -65,9 +75,10 @@ fetch(struct fetch_req *req)
 	j += sprintf(http_req + j, "Content-Length: %s\r\n", content_length);
 	j += sprintf(http_req + j, "Connection: close\r\n", content_length);
 
-	itr = new_map_itr(req->headers);
-	while((entry = itr_adv(itr)) != NULL) {
-		j += sprintf(http_req + j, "%s: %s\r\n", entry->key, entry->value);
+	itr = hmap_itr_new(req->headers);
+	while((entry = hmap_itr_adv(itr)) != NULL) {
+		j += sprintf(http_req + j, "%s: %s\r\n",
+					entry->key, (char *) entry->value);
 	}
 
 	// Body
@@ -77,7 +88,10 @@ fetch(struct fetch_req *req)
 	// Request
 	const int sock_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if(sock_fd == -1) {
-		PCOL("Can't establish socket connection with server", RED);
+		char *text_red_bold = col_str_style(RED, BOLD);
+		printf("\n%sCan't establish socket connection with server.%s\n",
+				text_red_bold, RESET);
+		free(text_red_bold);
 		exit(1);
 	}
 
@@ -88,7 +102,10 @@ fetch(struct fetch_req *req)
 	};
 
 	if(connect(sock_fd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1) {
-		PCOL("Connection Error\n", RED);
+		char *text_red_bold = col_str_style(RED, BOLD);
+		printf("\n%sConnection Error.%s\n",
+				text_red_bold, RESET);
+		free(text_red_bold);
 		exit(1);
 	}
 
@@ -99,10 +116,10 @@ fetch(struct fetch_req *req)
 	read(sock_fd, buf, sizeof(buf));
 
 
-	struct res_ok *data = malloc(sizeof(struct res_ok));
-	struct res_err *err = malloc(sizeof(struct res_err));
+	res_ok_t *data = malloc(sizeof(res_ok_t));
+	res_err_t *err = malloc(sizeof(res_err_t));
 
-	struct fetch_res *res = malloc(sizeof(struct fetch_res));
+	res_t *res = malloc(sizeof(res_t));
 	res->data = data;
 	res->err = err;
 
@@ -113,23 +130,23 @@ fetch(struct fetch_req *req)
 }
 
 void
-add_req_header(struct fetch_req *req, const char *header, const char* value)
+add_req_header(req_t *req, const char *header, const char* value)
 {
-	map_push(req->headers, header, value);
+	hmap_push(req->headers, header, (void*) value);
 }
 
 char*
-get_req_header(struct fetch_req *req, const char *header)
+get_req_header(req_t *req, const char *header)
 {
-	return map_get(req->headers, header);
+	return (char *) hmap_get(req->headers, header);
 }
 
 void
-free_fetch(struct fetch_req *req, struct fetch_res *res)
+free_fetch(req_t *req, res_t *res)
 {
 	// Free Req
 	free_url(req->url);
-	free_map(req->headers);
+	hmap_free(req->headers);
 
 	// Free Res
 	if(!res) {
@@ -139,7 +156,15 @@ free_fetch(struct fetch_req *req, struct fetch_res *res)
 	if(res->ok) {
 		free(res->data->body);
 		free(res->data->code);
-		free_map(res->data->headers);
+
+		hmap_itr_t *itr = hmap_itr_new(res->data->headers);
+		hmap_node_t *elem;
+		while((elem = hmap_itr_adv(itr)) != NULL) {
+			free(elem->value);
+		}
+
+		hmap_free(res->data->headers);
+
 
 		free(res->data);
 	} else {
